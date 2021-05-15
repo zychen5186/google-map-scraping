@@ -4,6 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
+from webdriver_manager.chrome import ChromeDriverManager#會自動幫忙抓符合電腦版本的chrome驅動程式
 import time
 import os
 
@@ -12,11 +13,11 @@ class WebDriver:
     location_data = {}
 
     def __init__(self):
-        self.PATH = "chromedriver.exe"
+        self.PATH = "chromedriver"
         self.options = Options()
         # self.options.binary_location = "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe"
         self.options.add_argument("--headless")
-        self.driver = webdriver.Chrome(self.PATH, options=self.options)
+        self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=self.options)
 
         self.location_data["rating"] = "NA"
         self.location_data["reviews_count"] = "NA"
@@ -50,18 +51,18 @@ class WebDriver:
     def get_location_data(self):
 
         try:
-            avg_rating = self.driver.find_element_by_class_name("mapsConsumerUiSubviewSectionSharedStar__section-star-display").text
-            total_reviews = self.driver.find_element_by_class_name("section-rating-term")
+            avg_rating = self.driver.find_element_by_class_name("section-star-array")
+            total_reviews = self.driver.find_element_by_class_name("widget-pane-link")
             address = self.driver.find_element_by_css_selector("[data-item-id='address']")
-            phone_number = self.driver.find_element_by_css_selector("[data-tooltip='Copy phone number']")
+            phone_number = self.driver.find_element_by_css_selector('[data-tooltip="複製電話號碼"]')
             website = self.driver.find_element_by_css_selector("[data-item-id='authority']")
         except:
             pass
         try:
-            self.location_data["rating"] = avg_rating.text
-            self.location_data["reviews_count"] = total_reviews.text[1:-1]
-            self.location_data["location"] = address.text
-            self.location_data["contact"] = phone_number.text
+            self.location_data["rating"] = avg_rating.get_attribute("aria-label")
+            self.location_data["reviews_count"] = total_reviews.get_attribute("aria-label")
+            self.location_data["location"] = address.get_attribute("aria-label")
+            self.location_data["contact"] = phone_number.get_attribute("aria-label")
             self.location_data["website"] = website.text
         except:
             pass
@@ -149,12 +150,14 @@ class WebDriver:
                 self.location_data["Reviews"].append({"name":a, "review":b, "date":c, "rating":d})
 
         except Exception as e:
+            print(e)
             pass
 
     def scrape(self, url):
         try:
             self.driver.get(url)
         except Exception as e:
+            print(e)
             self.driver.quit()
             #continue
         time.sleep(10)
@@ -172,6 +175,6 @@ class WebDriver:
 
         return(self.location_data)
 
-url = "https://www.google.com.tw/maps/place/%E6%BA%AB%E5%8F%A8Cafe+%26+Dining+%E5%92%96%E5%95%A1%E9%A4%90%E9%85%92%E9%A4%A8/@25.044545,121.5527027,15z/data=!3m1!5s0x3442abbf14b2fc5f:0xf3a7c3a71be03d0e!4m8!1m2!2m1!1z6Kqg5ZOB55Sf5rS7!3m4!1s0x3442ab246428501b:0x3585d331f8d9590b!8m2!3d25.0445662!4d121.5614467?hl=zh-TW&authuser=0"
+url = "https://www.google.com.tw/maps/place/%E6%9F%91%E6%A9%98Shinn+-+%E9%B4%A8%E8%94%A5/@25.0338402,121.5256193,14.25z/data=!4m5!3m4!1s0x0:0x3e0b9289c979b221!8m2!3d25.0231373!4d121.5544957?hl=zh-TW&authuser=0"
 x = WebDriver()
 print(x.scrape(url))
