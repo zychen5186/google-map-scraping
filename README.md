@@ -7,3 +7,5 @@
 import後利用ChromeDriverManager().install()每次根據電腦來抓驅動程式
 
         driver = webdriver.Chrome(ChromeDriverManager().install(), options=self.options)
+
+

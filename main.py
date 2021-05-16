@@ -19,8 +19,8 @@ class WebDriver:
         self.options.add_argument("--headless")
         self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=self.options)
 
-        self.location_data["rating"] = "NA"
-        self.location_data["reviews_count"] = "NA"
+        self.location_data["rating"] = 0
+        self.location_data["reviews_count"] = 0
         self.location_data["location"] = "NA"
         self.location_data["contact"] = "NA"
         self.location_data["website"] = "NA"
@@ -51,7 +51,7 @@ class WebDriver:
     def get_location_data(self):
 
         try:
-            avg_rating = self.driver.find_element_by_class_name("section-star-array")
+            avg_rating = self.driver.find_element_by_class_name("mapsConsumerUiSubviewSectionSharedStar__section-star-display")
             total_reviews = self.driver.find_element_by_class_name("widget-pane-link")
             address = self.driver.find_element_by_css_selector("[data-item-id='address']")
             phone_number = self.driver.find_element_by_css_selector('[data-tooltip="複製電話號碼"]')
@@ -59,8 +59,9 @@ class WebDriver:
         except:
             pass
         try:
-            self.location_data["rating"] = avg_rating.get_attribute("aria-label")
-            self.location_data["reviews_count"] = total_reviews.get_attribute("aria-label")
+            self.location_data["rating"] = int(avg_rating.text)
+            print("aaa")
+            self.location_data["reviews_count"] = int((total_reviews.text).split()[0])
             self.location_data["location"] = address.get_attribute("aria-label")
             self.location_data["contact"] = phone_number.get_attribute("aria-label")
             self.location_data["website"] = website.text
@@ -155,8 +156,11 @@ class WebDriver:
 
     def scrape(self, url):
         try:
+            
             self.driver.get(url)
+            print("SUCCEEDED")
         except Exception as e:
+            print("ERROR OCCURED")
             print(e)
             self.driver.quit()
             #continue
@@ -164,7 +168,7 @@ class WebDriver:
         self.click_open_close_time()
         self.get_location_data()
         self.get_location_open_close_time()
-        self.get_popular_times()
+        #self.get_popular_times()
                 #if(self.click_all_reviews_button()==False):
                     #continue
         time.sleep(5)
@@ -175,6 +179,6 @@ class WebDriver:
 
         return(self.location_data)
 
-url = "https://www.google.com.tw/maps/place/%E6%9F%91%E6%A9%98Shinn+-+%E9%B4%A8%E8%94%A5/@25.0338402,121.5256193,14.25z/data=!4m5!3m4!1s0x0:0x3e0b9289c979b221!8m2!3d25.0231373!4d121.5544957?hl=zh-TW&authuser=0"
+url = "https://g.page/citrusshinnduckramen?share"
 x = WebDriver()
 print(x.scrape(url))
